@@ -6,6 +6,9 @@
 
 BraTs2023 weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-brats2023-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/brats23)&nbsp;
 
+MMWHS-CT weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-mmwhsct-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/mmwhs-ct)&nbsp;
+
+MMWHS-MRI weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-mmwhsmri-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/mmwhs-mri)&nbsp;
 # Performance
 
 ![Performance](./figures/fig1.png)
