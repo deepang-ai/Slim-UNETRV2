@@ -4,6 +4,11 @@
 
 [![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-deepang/slimunetrv2-yellow)](https://huggingface.co/deepang/slimunetrv2)&nbsp;
 
+# Performance
+
+![Performance](./figures/fig1.png)
+Figure 1. Performance comparison of different frameworks on the BraTS 2023 dataset: (A) Dice Similarity Coefficient (DSC) and Throughput (higher values indicate better performance), and (B) 95% Hausdorff Distance (HD95%) and Inference Jitter (lower values indicate better performance).
+
 # Network Architecture
 
 ![Overview](./figures/Overview.jpg)
