@@ -9,14 +9,34 @@ BraTs2023 weights and logs: [![huggingface weights](https://img.shields.io/badge
 MMWHS-CT weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-mmwhsct-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/mmwhs-ct)&nbsp;
 
 MMWHS-MRI weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-mmwhsmri-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/mmwhs-mri)&nbsp;
+
+
+## Open Source
+
+We have publicly released the model architecture and the corresponding pretrained weights to facilitate reproducibility and further research. The code for the training pipeline is currently undergoing organizational structuring and will be made available in a forthcoming update.
+
+## Model Parameters
+
+The following hyperparameters were utilized for different input image dimensions:
+
+*   **For input images of size 128x128x128:**
+    ```python
+    SlimUNETRV2(in_chans=1, out_chans=3, kernel_sizes=[4, 2, 2, 2], num_slices_list=[64, 32, 16, 8])
+    ```
+*   **For input images of size 96x96x96:**
+    ```python
+    SlimUNETRV2(in_chans=1, out_chans=3, kernel_sizes=[2, 2, 2, 2], num_slices_list=[16, 8, 4, 2])
+    ```
+
 # Performance
 
 ![Performance](./figures/fig1.png)
-Figure 1. Performance comparison of different frameworks on the BraTS 2023 dataset: (A) Dice Similarity Coefficient (DSC) and Throughput (**higher values** indicate better performance), and (B) 95% Hausdorff Distance (HD95%) and Inference Jitter (**lower values** indicate better performance).
+**Figure 1.** Comparative performance analysis of various frameworks on the BraTS 2023 dataset. (A) Evaluation of Dice Similarity Coefficient (DSC) and Throughput, where higher values signify superior performance. (B) Assessment of 95% Hausdorff Distance (HD95%) and Inference Jitter, where lower values indicate better performance.
 
 # Network Architecture
 
 ![Overview](./figures/Overview.jpg)
+**Figure 2.** An overview of the Slim UNETRV2 network architecture.
 
 # Data Description
 ## Dataset Name: BraTS2021
