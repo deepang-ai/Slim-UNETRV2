@@ -10,12 +10,38 @@ MMWHS-CT weights and logs: [![huggingface weights](https://img.shields.io/badge/
 
 MMWHS-MRI weights and logs: [![huggingface weights](https://img.shields.io/badge/Weights%20%26%20logs-mmwhsmri-yellow)](https://huggingface.co/deepang/slimunetrv2/tree/main/mmwhs-mri)&nbsp;
 
+# Network Architecture
+
+![Overview](./figures/Overview.jpg)
+**Figure 2.** An overview of the Slim UNETRV2 network architecture.
 
 ## Open Source
 
 We have publicly released the model architecture and the corresponding pretrained weights to facilitate reproducibility and further research. The code for the training pipeline is currently undergoing organizational structuring and will be made available in a forthcoming update.
 
-## Model Parameters
+## Environment Setup
+### Install torch and monai
+
+```bash
+pip install torch torchvision torchaudio
+pip install monai
+```
+
+### Install causal-conv1d
+
+```bash
+cd environment/causal-conv1d/
+python setup.py install
+```
+
+### Install Mamba
+
+```bash
+cd environment/mamba/
+python setup.py install
+```
+
+## Model Hyperparameters
 
 The following hyperparameters were utilized for different input image dimensions:
 
@@ -33,10 +59,6 @@ The following hyperparameters were utilized for different input image dimensions
 ![Performance](./figures/fig1.png)
 **Figure 1.** Comparative performance analysis of various frameworks on the BraTS 2023 dataset. (A) Evaluation of Dice Similarity Coefficient (DSC) and Throughput, where higher values signify superior performance. (B) Assessment of 95% Hausdorff Distance (HD95%) and Inference Jitter, where lower values indicate better performance.
 
-# Network Architecture
-
-![Overview](./figures/Overview.jpg)
-**Figure 2.** An overview of the Slim UNETRV2 network architecture.
 
 # Data Description
 ## Dataset Name: BraTS2021
