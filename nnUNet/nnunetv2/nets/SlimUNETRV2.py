@@ -310,4 +310,3 @@ class SlimUNETRV2(nn.Module):
         x = self.seghead(x)
 
         return x
-

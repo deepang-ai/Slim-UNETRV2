@@ -77,7 +77,9 @@ def causal_conv1d_update(x, conv_state, weight, bias=None, activation=None):
     if activation not in [None, "silu", "swish"]:
         raise NotImplementedError("activation must be None, silu, or swish")
     activation = activation in ["silu", "swish"]
-    return causal_conv1d_cuda.causal_conv1d_update(x, conv_state, weight, bias, activation)
+    return causal_conv1d_cuda.causal_conv1d_update(
+        x, conv_state, weight, bias, activation
+    )
 
 
 def causal_conv1d_update_ref(x, conv_state, weight, bias=None, activation=None):
@@ -96,9 +98,9 @@ def causal_conv1d_update_ref(x, conv_state, weight, bias=None, activation=None):
     width = weight.shape[1]
     assert conv_state.shape == (batch, dim, width)
     assert weight.shape == (dim, width)
-    conv_state.copy_(torch.roll(conv_state, shifts=-1, dims=-1)) # Update state (B D W)
+    conv_state.copy_(torch.roll(conv_state, shifts=-1, dims=-1))  # Update state (B D W)
     conv_state[:, :, -1] = x
-    out = torch.sum(conv_state * weight, dim=-1) # (B D)
+    out = torch.sum(conv_state * weight, dim=-1)  # (B D)
     if bias is not None:
         out += bias
     return (out if activation is None else F.silu(out)).to(dtype=dtype_in)

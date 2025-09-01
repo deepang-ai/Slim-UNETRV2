@@ -8,7 +8,10 @@ import pytest
 
 from einops import rearrange
 
-from mamba_ssm.ops.triton.selective_state_update import selective_state_update, selective_state_update_ref
+from mamba_ssm.ops.triton.selective_state_update import (
+    selective_state_update,
+    selective_state_update_ref,
+)
 
 
 @pytest.mark.parametrize("itype", [torch.float32, torch.float16, torch.bfloat16])
@@ -40,8 +43,12 @@ def test_causal_conv1d_update(dim, dstate, has_z, itype):
     else:
         z = None
     state_ref = state.detach().clone()
-    out = selective_state_update(state, x, dt, A, B, C, D=D, z=z, dt_bias=dt_bias, dt_softplus=True)
-    out_ref = selective_state_update_ref(state_ref, x, dt, A, B, C, D=D, z=z, dt_bias=dt_bias, dt_softplus=True)
+    out = selective_state_update(
+        state, x, dt, A, B, C, D=D, z=z, dt_bias=dt_bias, dt_softplus=True
+    )
+    out_ref = selective_state_update_ref(
+        state_ref, x, dt, A, B, C, D=D, z=z, dt_bias=dt_bias, dt_softplus=True
+    )
 
     print(f"Output max diff: {(out - out_ref).abs().max().item()}")
     print(f"Output mean diff: {(out - out_ref).abs().mean().item()}")

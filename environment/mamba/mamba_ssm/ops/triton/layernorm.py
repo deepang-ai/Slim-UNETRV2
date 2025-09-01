@@ -16,7 +16,9 @@ import triton
 import triton.language as tl
 
 
-def layer_norm_ref(x, weight, bias, residual=None, eps=1e-6, prenorm=False, upcast=False):
+def layer_norm_ref(
+    x, weight, bias, residual=None, eps=1e-6, prenorm=False, upcast=False
+):
     dtype = x.dtype
     if upcast:
         weight = weight.float()
@@ -26,9 +28,9 @@ def layer_norm_ref(x, weight, bias, residual=None, eps=1e-6, prenorm=False, upca
         residual = residual.float() if residual is not None else residual
     if residual is not None:
         x = (x + residual).to(x.dtype)
-    out = F.layer_norm(x.to(weight.dtype), x.shape[-1:], weight=weight, bias=bias, eps=eps).to(
-        dtype
-    )
+    out = F.layer_norm(
+        x.to(weight.dtype), x.shape[-1:], weight=weight, bias=bias, eps=eps
+    ).to(dtype)
     return out if not prenorm else (out, x)
 
 
@@ -121,7 +123,14 @@ def _layer_norm_fwd_1pass_kernel(
 
 
 def _layer_norm_fwd(
-    x, weight, bias, eps, residual=None, out_dtype=None, residual_dtype=None, is_rms_norm=False
+    x,
+    weight,
+    bias,
+    eps,
+    residual=None,
+    out_dtype=None,
+    residual_dtype=None,
+    is_rms_norm=False,
 ):
     if residual is not None:
         residual_dtype = residual.dtype
@@ -138,12 +147,18 @@ def _layer_norm_fwd(
     # allocate output
     y = torch.empty_like(x, dtype=x.dtype if out_dtype is None else out_dtype)
     assert y.stride(-1) == 1
-    if residual is not None or (residual_dtype is not None and residual_dtype != x.dtype):
+    if residual is not None or (
+        residual_dtype is not None and residual_dtype != x.dtype
+    ):
         residual_out = torch.empty(M, N, device=x.device, dtype=residual_dtype)
         assert residual_out.stride(-1) == 1
     else:
         residual_out = None
-    mean = torch.empty((M,), dtype=torch.float32, device="cuda") if not is_rms_norm else None
+    mean = (
+        torch.empty((M,), dtype=torch.float32, device="cuda")
+        if not is_rms_norm
+        else None
+    )
     rstd = torch.empty((M,), dtype=torch.float32, device="cuda")
     # Less than 64KB per feature: enqueue fused kernel
     MAX_FUSED_SIZE = 65536 // x.element_size()
@@ -323,7 +338,11 @@ def _layer_norm_bwd(
         else torch.empty(M, N, dtype=x_dtype, device=x.device)
     )
     dresidual_in = torch.empty_like(x) if has_residual and dx.dtype != x.dtype else None
-    y = torch.empty(M, N, dtype=dy.dtype, device=dy.device) if recompute_output else None
+    y = (
+        torch.empty(M, N, dtype=dy.dtype, device=dy.device)
+        if recompute_output
+        else None
+    )
 
     # Less than 64KB per feature: enqueue fused kernel
     MAX_FUSED_SIZE = 65536 // x.element_size()
@@ -374,7 +393,11 @@ def _layer_norm_bwd(
     # Don't need to compute dresidual_in separately in this case
     if has_residual and dx.dtype == x.dtype:
         dresidual_in = dx
-    return (dx, dw, db, dresidual_in) if not recompute_output else (dx, dw, db, dresidual_in, y)
+    return (
+        (dx, dw, db, dresidual_in)
+        if not recompute_output
+        else (dx, dw, db, dresidual_in, y)
+    )
 
 
 class LayerNormFn(torch.autograd.Function):
@@ -409,7 +432,13 @@ class LayerNormFn(torch.autograd.Function):
             else (torch.float32 if residual_in_fp32 else None)
         )
         y, mean, rstd, residual_out = _layer_norm_fwd(
-            x, weight, bias, eps, residual, residual_dtype=residual_dtype, is_rms_norm=is_rms_norm
+            x,
+            weight,
+            bias,
+            eps,
+            residual,
+            residual_dtype=residual_dtype,
+            is_rms_norm=is_rms_norm,
         )
         ctx.save_for_backward(residual_out, weight, bias, mean, rstd)
         ctx.x_shape_og = x_shape_og
@@ -471,11 +500,17 @@ def layer_norm_fn(
     residual_in_fp32=False,
     is_rms_norm=False,
 ):
-    return LayerNormFn.apply(x, weight, bias, residual, eps, prenorm, residual_in_fp32, is_rms_norm)
+    return LayerNormFn.apply(
+        x, weight, bias, residual, eps, prenorm, residual_in_fp32, is_rms_norm
+    )
 
 
-def rms_norm_fn(x, weight, bias, residual=None, prenorm=False, residual_in_fp32=False, eps=1e-6):
-    return LayerNormFn.apply(x, weight, bias, residual, eps, prenorm, residual_in_fp32, True)
+def rms_norm_fn(
+    x, weight, bias, residual=None, prenorm=False, residual_in_fp32=False, eps=1e-6
+):
+    return LayerNormFn.apply(
+        x, weight, bias, residual, eps, prenorm, residual_in_fp32, True
+    )
 
 
 class RMSNorm(torch.nn.Module):
@@ -543,17 +578,23 @@ class LayerNormLinearFn(torch.autograd.Function):
             norm_bias,
             eps,
             residual,
-            out_dtype=None if not torch.is_autocast_enabled() else torch.get_autocast_gpu_dtype(),
+            out_dtype=None
+            if not torch.is_autocast_enabled()
+            else torch.get_autocast_gpu_dtype(),
             residual_dtype=residual_dtype,
             is_rms_norm=is_rms_norm,
         )
         y = y.reshape(x_shape_og)
-        dtype = torch.get_autocast_gpu_dtype() if torch.is_autocast_enabled() else y.dtype
+        dtype = (
+            torch.get_autocast_gpu_dtype() if torch.is_autocast_enabled() else y.dtype
+        )
         linear_weight = linear_weight.to(dtype)
         linear_bias = linear_bias.to(dtype) if linear_bias is not None else None
         out = F.linear(y.to(linear_weight.dtype), linear_weight, linear_bias)
         # We don't store y, will be recomputed in the backward pass to save memory
-        ctx.save_for_backward(residual_out, norm_weight, norm_bias, linear_weight, mean, rstd)
+        ctx.save_for_backward(
+            residual_out, norm_weight, norm_bias, linear_weight, mean, rstd
+        )
         ctx.x_shape_og = x_shape_og
         ctx.eps = eps
         ctx.is_rms_norm = is_rms_norm

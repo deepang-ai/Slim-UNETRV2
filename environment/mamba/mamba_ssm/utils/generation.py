@@ -11,7 +11,10 @@ import torch.nn.functional as F
 from einops import rearrange, repeat
 from torch import Tensor
 from torch.profiler import ProfilerActivity, profile, record_function
-from transformers.generation import GreedySearchDecoderOnlyOutput, SampleDecoderOnlyOutput
+from transformers.generation import (
+    GreedySearchDecoderOnlyOutput,
+    SampleDecoderOnlyOutput,
+)
 
 
 @dataclass
@@ -78,15 +81,17 @@ def sample(logits, top_k=1, top_p=0.0, temperature=1.0):
             modify_logits_for_top_p_filtering(logits_top, top_p)
             return indices[
                 torch.arange(indices.shape[0], device=indices.device),
-                torch.multinomial(torch.softmax(logits_top, dim=-1), num_samples=1).squeeze(dim=-1),
+                torch.multinomial(
+                    torch.softmax(logits_top, dim=-1), num_samples=1
+                ).squeeze(dim=-1),
             ]
         else:
             # Clone so that when we modify for top_p we don't change the original logits
             logits_top = logits / temperature if temperature != 1.0 else logits.clone()
             modify_logits_for_top_p_filtering(logits_top, top_p)
-            return torch.multinomial(torch.softmax(logits_top, dim=-1), num_samples=1).squeeze(
-                dim=-1
-            )
+            return torch.multinomial(
+                torch.softmax(logits_top, dim=-1), num_samples=1
+            ).squeeze(dim=-1)
 
 
 @torch.inference_mode()
@@ -135,7 +140,9 @@ def decode(
         inference_params = model._decoding_cache.inference_params
         inference_params.reset(max_length, batch_size)
     else:
-        inference_params = InferenceParams(max_seqlen=max_length, max_batch_size=batch_size)
+        inference_params = InferenceParams(
+            max_seqlen=max_length, max_batch_size=batch_size
+        )
 
     def get_logits(input_ids, inference_params):
         decoding = inference_params.seqlen_offset > 0
@@ -162,7 +169,10 @@ def decode(
         return logits[..., :vocab_size] if vocab_size is not None else logits
 
     def sample_tokens(logits, inference_params):
-        if teacher_outputs is None or teacher_output_len <= inference_params.seqlen_offset:
+        if (
+            teacher_outputs is None
+            or teacher_output_len <= inference_params.seqlen_offset
+        ):
             token = sample(logits, top_k=top_k, top_p=top_p, temperature=temperature)
         else:
             token = teacher_outputs[:, inference_params.seqlen_offset]
@@ -196,7 +206,9 @@ def decode(
             torch.distributed.barrier()
         torch.cuda.synchronize()
         print(f"Prompt processing + decoding time: {(start.elapsed_time(end)):.0f}ms")
-    output_cls = GreedySearchDecoderOnlyOutput if top_k == 1 else SampleDecoderOnlyOutput
+    output_cls = (
+        GreedySearchDecoderOnlyOutput if top_k == 1 else SampleDecoderOnlyOutput
+    )
     return output_cls(sequences=torch.cat(sequences, dim=1), scores=tuple(scores))
 
 
@@ -216,7 +228,13 @@ class GenerationMixin:
         **kwargs,
     ):
         output = decode(
-            input_ids, self, max_length, top_k=top_k, top_p=top_p, temperature=temperature, **kwargs
+            input_ids,
+            self,
+            max_length,
+            top_k=top_k,
+            top_p=top_p,
+            temperature=temperature,
+            **kwargs,
         )
         if not output_scores:
             output.scores = None
@@ -297,7 +315,9 @@ def update_graph_cache(
                 device,
                 dtype,
             )
-        lengths_per_sample = torch.full((batch_size,), seqlen_og, dtype=torch.int32, device=device)
+        lengths_per_sample = torch.full(
+            (batch_size,), seqlen_og, dtype=torch.int32, device=device
+        )
         cache.inference_params = InferenceParams(
             max_seqlen=max_seqlen,
             max_batch_size=batch_size,
@@ -320,7 +340,9 @@ def update_graph_cache(
 
     def dispatch(input_ids, position_ids, seqlen):
         batch_size, decoding_seqlen = input_ids.shape[:2]
-        return cache.callables[batch_size, decoding_seqlen](input_ids, position_ids, seqlen)
+        return cache.callables[batch_size, decoding_seqlen](
+            input_ids, position_ids, seqlen
+        )
 
     cache.run = dispatch
     cache.inference_params.seqlen_offset = 0  # Reset so it's not confusing
@@ -328,11 +350,21 @@ def update_graph_cache(
 
 
 def capture_graph(
-    model, inference_params, batch_size, max_seqlen, decoding_seqlen=1, mempool=None, n_warmups=2
+    model,
+    inference_params,
+    batch_size,
+    max_seqlen,
+    decoding_seqlen=1,
+    mempool=None,
+    n_warmups=2,
 ):
     device = next(iter(model.parameters())).device
-    input_ids = torch.full((batch_size, decoding_seqlen), 0, dtype=torch.long, device=device)
-    position_ids = torch.full((batch_size, decoding_seqlen), 0, dtype=torch.long, device=device)
+    input_ids = torch.full(
+        (batch_size, decoding_seqlen), 0, dtype=torch.long, device=device
+    )
+    position_ids = torch.full(
+        (batch_size, decoding_seqlen), 0, dtype=torch.long, device=device
+    )
     seqlen_offset_og = inference_params.seqlen_offset
     inference_params.seqlen_offset = max_seqlen - decoding_seqlen
     inference_params.lengths_per_sample[:] = inference_params.seqlen_offset
