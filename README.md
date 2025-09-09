@@ -167,7 +167,7 @@ Qualitative visualizations of Slim UNETRV2 and baseline approaches for the MM-WH
 If you find this repository useful, please cite:
 
 ```bibtex
-@ARTICLE{11138028,
+@ARTICLE{pang2025slim,
   author={Pang, Yan and Liang, Jiaming and Yan, Junming and Hu, Ying and Chen, Hao and Wang, Qiong},
   journal={IEEE Transactions on Medical Imaging}, 
   title={Slim UNETRV2: 3D Image Segmentation for Resource-Limited Medical Portable Devices}, 
