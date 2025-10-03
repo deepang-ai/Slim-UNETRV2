@@ -16,6 +16,7 @@ class SlimUNETRV2_128Trainer(nnUNetTrainer):
     ):
         super().__init__(plans, configuration, fold, dataset_json, device)
         self.enable_deep_supervision = False
+        self.set_deep_supervision_enabled = lambda enabled: None
 
     def build_network_architecture(
         self,
@@ -32,7 +33,7 @@ class SlimUNETRV2_128Trainer(nnUNetTrainer):
             kernel_sizes=[4, 2, 2, 2],
             num_slices_list=[64, 32, 16, 8],
         )
-        self.configuration_manager.patch_size = (128, 128, 128)
+        self.configuration_manager.configuration["patch_size"] = (128, 128, 128)
         return model
 
 
@@ -47,6 +48,7 @@ class SlimUNETRV2_96Trainer(nnUNetTrainer):
     ):
         super().__init__(plans, configuration, fold, dataset_json, device)
         self.enable_deep_supervision = False
+        self.set_deep_supervision_enabled = lambda enabled: None
 
     def build_network_architecture(
         self,
@@ -63,5 +65,5 @@ class SlimUNETRV2_96Trainer(nnUNetTrainer):
             kernel_sizes=[2, 2, 2, 2],
             num_slices_list=[16, 8, 4, 2],
         )
-        self.configuration_manager.patch_size = (96, 96, 96)
+        self.configuration_manager.configuration["patch_size"] = (96, 96, 96)
         return model
