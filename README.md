@@ -168,15 +168,14 @@ If you find this repository useful, please cite:
 
 ```bibtex
 @ARTICLE{pang2025slim,
-  author={Pang, Yan and Liang, Jiaming and Yan, Junming and Hu, Ying and Chen, Hao and Wang, Qiong},
+  author={Pang, Yan and Liang, Jiaming and Huang, Teng and Chen, Hao and Li, Yunhao and Li, Dan and Huang, Lin and Wang, Qiong},
   journal={IEEE Transactions on Medical Imaging}, 
-  title={Slim UNETRV2: 3D Image Segmentation for Resource-Limited Medical Portable Devices}, 
-  year={2025},
-  volume={},
-  number={},
-  pages={1-1},
-  keywords={Image segmentation;Accuracy;Jitter;Decoding;Medical diagnostic imaging;Three-dimensional displays;Feature extraction;Computational modeling;Solid modeling;Image analysis;3D medical segmentation;lightweight;on-device model;resource-limited application},
-  doi={10.1109/TMI.2025.3602145}}
+  title={Slim UNETR: Scale Hybrid Transformers to Efficient 3D Medical Image Segmentation Under Limited Computational Resources}, 
+  year={2024},
+  volume={43},
+  number={3},
+  pages={994-1005}
+}
 ```
 
 # License
